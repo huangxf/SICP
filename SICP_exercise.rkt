@@ -1,0 +1,96 @@
+#lang racket
+;Exercise 1.5
+(define (sqrt-iter x)
+  (sqrt-calc x x 100))
+
+(define (sqrt-calc p x iter)
+  (if (= iter 0) x
+      (sqrt-calc p (+ (* 0.5 x) (/ p (* 2 x))) (- iter 1))))
+
+
+;Exercise 1.6 new-if
+(define (new-if predicate then-clause else-clause)
+  (cond (predicate then-clause)
+        (else else-clause)))
+
+(define (sqrt-newif x)
+  (sqrt-calc-newif x x 0))
+
+;sqrt-calc-newif会因为递归而造成栈溢出
+;if语句在ifthen和else子句中间只eval一个
+;new-if则是两个子句都eval，而new-if的else子句会造成深度递归，无终结条件，最后会造成栈溢出
+(define (sqrt-calc-newif p x iter)
+  (new-if (= iter 0) x
+      (sqrt-calc-newif p (+ (* 0.5 x) (/ p (* 2 x))) (- iter 1))))
+
+;Exercise 1.8
+;采用(/ (+ (/ x (* y y)) (* 2.0 y)) 3.0)作为迭代函数来求立方根
+(define (sqrt-cube-root x)
+  (sqrt-cube-root-calc x x 100))
+
+(define (sqrt-cube-root-calc p x iter)
+  (if (= iter 0) x
+      (sqrt-cube-root-calc p (/ (+ (/ p (* x x)) (* 2.0 x)) 3.0) (- iter 1))))
+
+;Exercise 1.9
+;递归: 计算过程中轨迹的长度和规模会不断增长
+;迭代: 计算过程中的轨迹和规模是可预计的常数
+;(1) 递归
+;(2) 迭代
+
+;Exercise 1.10
+(define (A x y)
+  (cond ((= y 0) 0)
+        ((= x 0) (* 2 y))
+        ((= y 1) 2)
+        (else (A (- x 1)
+                 (A x (- y 1))))))
+
+;找零钱的题目（不是练习）
+(define coins '(50 25 10 5 1))
+
+(define (sum_method m money coin_list)
+  (cond ((< m 0) 0)
+        ((null? coin_list) 0)
+        (else (let ((cost (* m (car coin_list))))
+              (+ (find-change (- money cost) (cdr coin_list)) (sum_method (- m 1) money coin_list))
+  ))))
+
+(define (find-change money coin_list)
+  (cond ((< money 0) 0)
+        ((= money 0) 1)
+        ((null? coin_list) 0)
+        (else (let ((m (floor (/ money (car coin_list))))
+                    (coin (car coin_list)))
+              (sum_method m money coin_list)
+                ))))
+
+;solution:
+;(find-change 100 coins)
+;The answer is 292
+		
+;Exercise 1.11
+;Recursive version
+(define (ex1-11-recur n)
+  (cond ((< n 3) n)
+        (else (+ (* 3 (ex1-11-recur (- n 3))) (+ (* 2 (ex1-11-recur (- n 2))) (ex1-11-recur(- n 1)))))))
+
+;Iteration version
+(define (ex1-11-iter a b c n)
+  (cond ((<= n 2) a)
+        (else (ex1-11-iter (+ (+ a (* 2 b)) (* 3 c)) a b (- n 1)))))
+;Iteration version
+(define (ex1-11 n)
+  (ex1-11-iter 2 1 0 n))
+
+;Exercise 1.12
+(define (pascal-triangle n)
+  (define (row-helper lst)
+    (cond ((null? lst) null)
+          ((null? (cdr lst)) null)
+          (else (cons (+ (car lst) (car (cdr lst))) (row-helper (cdr lst))))
+          ))
+  (cond ((= n 1) '(1))
+        (else (cons 1 (append (row-helper (pascal-triangle (- n 1))) '(1))))))
+
+
